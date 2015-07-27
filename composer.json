@@ -1,0 +1,22 @@
+{
+    "name": "kasperg/git-glue",
+    "description": "Glue multiple git repositories into one",
+    "authors": [
+        {
+            "name": "Kasper Garnaes",
+            "email": "kasper.garnaes@gmail.com"
+        }
+    ],
+    "require": {
+        "cpliakas/git-wrapper": "~1.5",
+        "duncan3dc/climate-logger": "^0.2.0",
+        "symfony/filesystem": "~2.7",
+        "league/climate": "^3.1"
+    },
+    "repositories": [
+      {
+        "url": "https://github.com/duncan3dc/climate-logger.git",
+        "type": "vcs"
+      }
+    ]
+}
