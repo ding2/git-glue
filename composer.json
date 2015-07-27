@@ -9,9 +9,9 @@
     ],
     "require": {
         "cpliakas/git-wrapper": "~1.5",
-        "duncan3dc/climate-logger": "^0.2.0",
         "symfony/filesystem": "~2.7",
-        "league/climate": "^3.1"
+        "mnapoli/silly": "^1.1",
+        "psr/log": "^1.0"
     },
     "repositories": [
       {
