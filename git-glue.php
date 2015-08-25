@@ -10,11 +10,11 @@ $app = new Silly\Application('git-glue', '0.1');
 
 $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
     // Load configuration
-    $config = require('config.php');
-    $workingDir = $config['workingDir'];
-    $workingBranch = $config['workingBranch'];
-    $target = $config['targetRepo'];
-    $sources = $config['sourceRepos'];
+    $config = \Noodlehaus\Config::load('config.php');
+    $workingDir = $config->get('workingDir');
+    $workingBranch = $config->get('workingBranch');
+    $target = $config->get('targetRepo');
+    $sources = $config->get('sourceRepos', array());
 
     // Create services
     $git = new \GitWrapper\GitWrapper();
@@ -78,11 +78,11 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
 
 $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
     // Load configuration
-    $config = require('config.php');
-    $workingDir = $config['workingDir'];
-    $workingBranch = $config['workingBranch'];
-    $target = $config['targetRepo'];
-    $sources = $config['sourceRepos'];
+    $config = \Noodlehaus\Config::load('config.php');
+    $workingDir = $config->get('workingDir');
+    $workingBranch = $config->get('workingBranch');
+    $target = $config->get('targetRepo');
+    $sources = $config->get('sourceRepos', array());
 
     // Create services
     $git = new \GitWrapper\GitWrapper();
