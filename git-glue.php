@@ -74,6 +74,47 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
   }
 
   $progress->finish();
-});
+})->descriptions('Merge the contents of multiple repositories into one.');
+
+$app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
+    // Load configuration
+    $config = require('config.php');
+    $workingDir = $config['workingDir'];
+    $workingBranch = $config['workingBranch'];
+    $target = $config['targetRepo'];
+    $sources = $config['sourceRepos'];
+
+    $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
+
+    // Download the patch as a temporary file.
+    $patch = tempnam(sys_get_temp_dir(), 'git-glue-patch');
+    file_put_contents($patch, file_get_contents($url));
+
+    // Determine the directory for the patch if not provided.
+    if (empty($dir)) {
+        $patchPath = parse_url($url, PHP_URL_PATH);
+        $patchRepoName = explode('/', $patchPath)[2];
+
+        // Build a map of source repository names and paths.
+        $sourceNames = array_map(array('\GitWrapper\Gitwrapper', 'parseRepositoryName'), array_keys($sources));
+        $namedSourceTargetDirectories = array_combine($sourceNames, array_values($sources));
+
+        if (!empty($namedSourceTargetDirectories[$patchRepoName])) {
+            $dir = $namedSourceTargetDirectories[$patchRepoName];
+        }
+    }
+
+    // Create services
+    $git = new \GitWrapper\GitWrapper();
+    $git->addLoggerListener(new \GitWrapper\Event\GitLoggerListener(new \Symfony\Component\Console\Logger\ConsoleLogger($output)));
+    $targetRepo = $git->workingCopy($targetDir);
+    $targetRepo->checkoutNewBranch($workingBranch);
+
+    // Apply the patch
+    $targetRepo->run(array('am', $patch, array('directory' => $dir)));
+})->descriptions('Apply a patch which has been created against a previously merged repository', array(
+    'url' => 'The url for the patch to apply.',
+    '--dir' => "The directory to prepend to all file names in the patch. git-glue will try to guess this by comparing patch url and source repository configuration."
+));
 
 $app->run();
