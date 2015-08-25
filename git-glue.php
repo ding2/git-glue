@@ -122,20 +122,18 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
         }
     }
 
-    if (!empty($targetRepo) && !empty($workingDir)) {
+    if (!empty($target) && !empty($workingDir)) {
         // If we have a target repository and a working directory defined then
         // assume that we want to work with that.
         $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
         if (!$fs->exists($targetDir)) {
-            $targetRepo = $git->cloneRepository($targetRepo, $targetDir);
-        } else {
-            $targetRepo = $git->workingCopy($targetDir);
+            $git->cloneRepository($target, $targetDir, array('branch' => $workingBranch));
         }
     } else {
-        // Assume that the current directory is a git repository and work with
-        // that.
-        $targetRepo = $git->workingCopy(getcwd());
+        // Assume that the current directory is repository we work with.
+        $targetDir = getcwd();
     }
+    $targetRepo = $git->workingCopy($targetDir);
 
     if (!empty($workingBranch)) {
         // If we have a working branch then lets use that.
