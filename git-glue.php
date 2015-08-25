@@ -36,7 +36,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
     $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
     $fs->remove($targetDir);
     $targetRepo = $git->cloneRepository($target, $targetDir);
-    $targetRepo->checkoutNewBranch($workingBranch);
+    $targetRepo->checkout($workingBranch, array('B' => true));
     $progress->advance();
 
     foreach ($sources as $source => $targetSubDir) {
@@ -48,7 +48,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
 
         $fs->remove($sourceDir);
         $sourceRepo = $git->cloneRepository($source, $sourceDir);
-        $sourceRepo->checkoutNewBranch($workingBranch);
+        $sourceRepo->checkout($workingBranch, array('B' => true));
 
         // Move repository content into the intented subdirectory.
         $fs->mkdir($sourceDir . DIRECTORY_SEPARATOR . $targetSubDir);
@@ -124,7 +124,7 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
 
     if (!empty($workingBranch)) {
         // If we have a working branch then lets use that.
-        $targetRepo->checkoutNewBranch($workingBranch);
+        $targetRepo->checkout($workingBranch, array('B' => true));
     }
 
     // Apply the patch
