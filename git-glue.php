@@ -95,8 +95,23 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
 
     // Determine the directory for the patch if not provided.
     if (empty($dir)) {
-        $patchPath = parse_url($url, PHP_URL_PATH);
-        $patchRepoName = explode('/', $patchPath)[2];
+        $patchPatterns = array(
+            // Patterns for determining the origin repository from patch url.
+            // Each should match only a single group which should be the
+            // repository name.
+            // - https://github.com/user/repo/pull/123.patch
+            // - patch-diff.githubusercontent.com/raw/user/repo/pull/123.patch
+            '#/([^/]+)/pull#',
+            // - https://github.com/user/repo/compare/master...branch.patch
+            '#/([^/]+)/compare#'
+        );
+        $patchRepoName = null;
+        foreach ($patchPatterns as $pattern) {
+            if (preg_match($pattern, $url, $patchRepoName)) {
+                $patchRepoName = $patchRepoName[1];
+                break;
+            }
+        }
 
         // Build a map of source repository names and paths.
         $sourceNames = array_map(array('\GitWrapper\Gitwrapper', 'parseRepositoryName'), array_keys($sources));
