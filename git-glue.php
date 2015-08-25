@@ -58,7 +58,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
             if (!in_array($file, array('.', '..'))) {
                 // Add the k option to suppress errors when trying to move into own
                 // subdirectory.
-                $sourceRepo->mv($file, $targetSubDir, array('k' => TRUE));
+                $sourceRepo->mv($file, $targetSubDir, array('k' => true));
             }
         }
         $sourceRepo->commit(
