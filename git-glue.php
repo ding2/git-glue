@@ -33,7 +33,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
 
   // First checkout a new branch from a clean version of the target repository.
   $progress->setMessage(sprintf('Prepare target repository %s', $target));
-  $targetDir = $workingDir . parse_url($target, PHP_URL_PATH);
+  $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
   $fs->remove($targetDir);
   $targetRepo = $git->cloneRepository($target, $targetDir);
   $targetRepo->checkoutNewBranch($workingBranch);
@@ -42,7 +42,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
   foreach ($sources as $source => $targetSubDir) {
     // Now clone each of the sources. We assume that the default branch is the
     // one we want.
-    $sourceDir = $workingDir . parse_url($source, PHP_URL_PATH);
+    $sourceDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($source);
 
     $progress->setMessage(sprintf('Merge source repository %s into %s', $source, $targetSubDir));
 
