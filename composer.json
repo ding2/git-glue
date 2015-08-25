@@ -13,4 +13,11 @@
         "mnapoli/silly": "^1.1",
         "psr/log": "^1.0"
     },
+    "require-dev": {
+        "clue/phar-composer": "dev-master"
+    },
+    "bin": ["bin/git-glue"],
+    "scripts": {
+      "build-phar": "vendor/bin/phar-composer build ."
+    }
 }
