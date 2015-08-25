@@ -92,6 +92,7 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
     // Download the patch as a temporary file.
     $patch = tempnam(sys_get_temp_dir(), 'git-glue-patch');
     file_put_contents($patch, file_get_contents($url));
+    $output->writeln(sprintf('Patch downloaded from %s', $url));
 
     // Determine the directory for the patch if not provided.
     if (empty($dir)) {
@@ -134,13 +135,16 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
         $targetDir = getcwd();
     }
     $targetRepo = $git->workingCopy($targetDir);
+    $output->writeln(sprintf('Using repository in %s', realpath($targetRepo->getDirectory())));
 
     if (!empty($workingBranch)) {
         // If we have a working branch then lets use that.
         $targetRepo->checkout($workingBranch, array('B' => true));
+        $output->writeln(sprintf('Using branch %s', $workingBranch));
     }
 
     // Apply the patch
+    $output->writeln(sprintf('Applying patch on directory %s', $dir));
     $targetRepo->run(array('am', $patch, array('directory' => $dir)));
 })->descriptions('Apply a patch which has been created against a previously merged repository.', array(
     'url' => 'The url for the patch to apply.',
