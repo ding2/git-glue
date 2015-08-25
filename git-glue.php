@@ -84,7 +84,10 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
     $target = $config['targetRepo'];
     $sources = $config['sourceRepos'];
 
-    $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
+    // Create services
+    $git = new \GitWrapper\GitWrapper();
+    $git->addLoggerListener(new \GitWrapper\Event\GitLoggerListener(new \Symfony\Component\Console\Logger\ConsoleLogger($output)));
+    $fs = new \Symfony\Component\Filesystem\Filesystem();
 
     // Download the patch as a temporary file.
     $patch = tempnam(sys_get_temp_dir(), 'git-glue-patch');
@@ -104,15 +107,29 @@ $app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Compone
         }
     }
 
-    // Create services
-    $git = new \GitWrapper\GitWrapper();
-    $git->addLoggerListener(new \GitWrapper\Event\GitLoggerListener(new \Symfony\Component\Console\Logger\ConsoleLogger($output)));
-    $targetRepo = $git->workingCopy($targetDir);
-    $targetRepo->checkoutNewBranch($workingBranch);
+    if (!empty($targetRepo) && !empty($workingDir)) {
+        // If we have a target repository and a working directory defined then
+        // assume that we want to work with that.
+        $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
+        if (!$fs->exists($targetDir)) {
+            $targetRepo = $git->cloneRepository($targetRepo, $targetDir);
+        } else {
+            $targetRepo = $git->workingCopy($targetDir);
+        }
+    } else {
+        // Assume that the current directory is a git repository and work with
+        // that.
+        $targetRepo = $git->workingCopy(getcwd());
+    }
+
+    if (!empty($workingBranch)) {
+        // If we have a working branch then lets use that.
+        $targetRepo->checkoutNewBranch($workingBranch);
+    }
 
     // Apply the patch
     $targetRepo->run(array('am', $patch, array('directory' => $dir)));
-})->descriptions('Apply a patch which has been created against a previously merged repository', array(
+})->descriptions('Apply a patch which has been created against a previously merged repository.', array(
     'url' => 'The url for the patch to apply.',
     '--dir' => "The directory to prepend to all file names in the patch. git-glue will try to guess this by comparing patch url and source repository configuration."
 ));
