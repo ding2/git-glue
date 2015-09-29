@@ -6,7 +6,7 @@ The approach in inspired by the blog post ["Moving Files from one Git Repository
 
 ## Installation and setup
 
-1. Go to the [latest release](releases/latest) 
+1. Go to the [latest release](https://github.com/ding2/git-glue/releases/latest) 
 2. Download the `git-glue.phar` file
 3. Run `phar git-glue.phar` to see a list of available commands
 4. Create a `config.php` from where you intend to run git-glue. See [the sample file](https://raw.githubusercontent.com/kasperg/git-glue/master/config.sample.php) for configuration options. The location can either be a git checkout of the target repository on an arbitrary directory if the `workingDir` configuration option is defined.
