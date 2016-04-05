@@ -33,6 +33,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
 
     // First checkout a new branch from a clean version of the target repository.
     $progress->setMessage(sprintf('Prepare target repository %s', $target));
+    $progress->display();
     $targetDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($target);
     $fs->remove($targetDir);
     $targetRepo = $git->cloneRepository($target, $targetDir);
@@ -45,6 +46,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
         $sourceDir = $workingDir . DIRECTORY_SEPARATOR . \GitWrapper\GitWrapper::parseRepositoryName($source);
 
         $progress->setMessage(sprintf('Merge source repository %s into %s', $source, $targetSubDir));
+        $progress->display();
 
         $fs->remove($sourceDir);
         $sourceRepo = $git->cloneRepository($source, $sourceDir);
