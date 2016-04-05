@@ -50,17 +50,26 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
         $sourceRepo = $git->cloneRepository($source, $sourceDir);
         $sourceRepo->checkout($workingBranch, array('B' => true));
 
-        // Move repository content into the intented subdirectory.
-        $fs->mkdir($sourceDir . DIRECTORY_SEPARATOR . $targetSubDir);
-        // GitWrapper does not support moving * as each argument is escaped.
-        // Loop through directory contents instead.
+        // We're using a temporary directory in case there's already a
+        // directory in the source repo at the source path. You can't move a
+        // directory to be a sub-directory of itself.
+        $tmpDir = 'git-glue-tmp-dir';
+        // Make temporary dir.
+        $fs->mkdir($sourceDir . DIRECTORY_SEPARATOR . $tmpDir);
+        // Move repository content into the temporary directory. GitWrapper
+        // does not support moving * as each argument is escaped. Loop through
+        // directory contents instead.
         foreach (scandir($sourceDir) as $file) {
-            if (!in_array($file, array('.', '..'))) {
-                // Add the k option to suppress errors when trying to move into own
-                // subdirectory.
-                $sourceRepo->mv($file, $targetSubDir, array('k' => true));
+            if (!in_array($file, array('.', '..', '.git', $tmpDir))) {
+                $sourceRepo->mv($file, $tmpDir);
             }
         }
+
+        // Create parents of the target directory.
+        $fs->mkdir(dirname($sourceDir . DIRECTORY_SEPARATOR . $targetSubDir));
+        // Move temporary directory into the intended sub-directory.
+        $sourceRepo->mv($tmpDir, $targetSubDir);
+
         $sourceRepo->commit(
             sprintf('Moved %s into subdirectory %s', $source, $targetSubDir)
         );
