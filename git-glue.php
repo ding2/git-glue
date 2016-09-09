@@ -87,7 +87,7 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
     $progress->finish();
 })->descriptions('Merge the contents of multiple repositories into one.');
 
-$app->command('apply-patch [url] [--dir]', function($url, $dir, \Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
+$app->command('apply-patch [url] [--dir=]', function($url, $dir, \Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
     // Load configuration
     $config = \Noodlehaus\Config::load('config.php');
     $workingDir = $config->get('workingDir');
