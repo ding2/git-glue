@@ -115,7 +115,9 @@ $app->command('apply-patch [url] [--dir=]', function($url, $dir, \Symfony\Compon
             // - patch-diff.githubusercontent.com/raw/user/repo/pull/123.patch
             '#/([^/]+)/pull#',
             // - https://github.com/user/repo/compare/master...branch.patch
-            '#/([^/]+)/compare#'
+            '#/([^/]+)/compare#',
+            // - https://github.com/user/repo/commit/abc123.patch
+            '#/([^/]+)/commit#'
         );
         $patchRepoName = null;
         foreach ($patchPatterns as $pattern) {
