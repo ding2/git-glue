@@ -19,6 +19,12 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
     // Create services
     $git = new \GitWrapper\GitWrapper();
     $git->addLoggerListener(new \GitWrapper\Event\GitLoggerListener(new \Symfony\Component\Console\Logger\ConsoleLogger($output)));
+    // Extract version of git being used. Should look something like this:
+    // git version 2.9.2
+    $gitVersionInfo = [];
+    preg_match_all('/\d+\.\d+\.\d+/', $git->version(), $gitVersionInfo);
+    $gitVersion = (!empty($gitVersionInfo[0][0])) ? $gitVersionInfo[0][0] : NULL;
+    $output->writeln(sprintf('Using git %s', $gitVersion), $output::VERBOSITY_VERBOSE);
 
     $fs = new \Symfony\Component\Filesystem\Filesystem();
 
@@ -79,7 +85,13 @@ $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface
         // Finally add the local clone of the source as a remote to the target and
         // pull in the changes.
         $targetRepo->remote('add', $targetSubDir, $sourceRepo->getDirectory());
-        $targetRepo->pull($targetSubDir, $workingBranch);
+        $merge_options = '';
+        if (\Composer\Semver\Semver::satisfies($gitVersion, '^2.9')) {
+            // From git 2.9 we have to set a flag to allow the merge.
+            // https://github.com/git/git/blob/master/Documentation/RelNotes/2.9.0.txt#L58-L68
+            $merge_options = '--allow-unrelated-histories';
+        }
+        $targetRepo->pull($targetSubDir, $workingBranch, $merge_options);
 
         $progress->advance();
     }
