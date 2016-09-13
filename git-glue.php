@@ -6,7 +6,7 @@ require_once('vendor/autoload.php');
 // repositories into subdirectories within a target repository while preserving
 // the git history of each source.
 
-$app = new Silly\Application('git-glue', '0.2.1');
+$app = new Silly\Application('git-glue', '0.3.0');
 
 $app->command('glue', function(\Symfony\Component\Console\Output\OutputInterface $output) use ($app) {
     // Load configuration
